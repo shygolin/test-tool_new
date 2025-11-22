@@ -52,7 +52,7 @@ def get_column_letter(col_index):
     return result
 
 def get_google_sheets_client():
-    """Get Google Sheets client using Replit connection"""
+    """Get Google Sheets client using Replit connection or Streamlit secrets"""
     try:
         hostname = os.environ.get('REPLIT_CONNECTORS_HOSTNAME')
         x_replit_token = None
@@ -60,48 +60,56 @@ def get_google_sheets_client():
         repl_identity = os.environ.get('REPL_IDENTITY')
         web_repl_renewal = os.environ.get('WEB_REPL_RENEWAL')
         
+        # Try Replit connection first
         if repl_identity:
             x_replit_token = 'repl ' + repl_identity
         elif web_repl_renewal:
             x_replit_token = 'depl ' + web_repl_renewal
         
-        if not x_replit_token or not hostname:
-            return None, "未找到Replit身份驗證信息"
+        if x_replit_token and hostname:
+            url = f'https://{hostname}/api/v2/connection?include_secrets=true&connector_names=google-sheet'
+            headers = {
+                'Accept': 'application/json',
+                'X_REPLIT_TOKEN': x_replit_token
+            }
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    items = data.get('items', [])
+                    
+                    if items:
+                        connection_settings = items[0]
+                        access_token = connection_settings.get('settings', {}).get('access_token')
+                        
+                        if not access_token:
+                            oauth_creds = connection_settings.get('settings', {}).get('oauth', {}).get('credentials', {})
+                            access_token = oauth_creds.get('access_token')
+                        
+                        if access_token:
+                            credentials = Credentials(token=access_token)
+                            client = gspread.authorize(credentials)
+                            return client, None
+            except Exception:
+                pass
         
-        url = f'https://{hostname}/api/v2/connection?include_secrets=true&connector_names=google-sheet'
-        headers = {
-            'Accept': 'application/json',
-            'X_REPLIT_TOKEN': x_replit_token
-        }
-        
+        # Try Streamlit Secrets (for Streamlit Cloud)
         try:
-            response = requests.get(url, headers=headers, timeout=10)
-        except requests.exceptions.RequestException as e:
-            return None, f"連接到Replit API時出錯: {str(e)}"
+            if 'google_sheets_credentials' in st.secrets:
+                import json as json_module
+                creds_dict = st.secrets['google_sheets_credentials']
+                if isinstance(creds_dict, str):
+                    creds_dict = json_module.loads(creds_dict)
+                
+                from google.oauth2.service_account import Credentials as ServiceAccountCredentials
+                credentials = ServiceAccountCredentials.from_service_account_info(creds_dict)
+                client = gspread.authorize(credentials)
+                return client, None
+        except Exception as secret_error:
+            pass
         
-        if response.status_code != 200:
-            return None, f"無法連接到Google Sheets (狀態碼: {response.status_code}, 詳情: {response.text[:200]})"
-        
-        data = response.json()
-        items = data.get('items', [])
-        
-        if not items:
-            return None, "Google Sheets連接未設置"
-        
-        connection_settings = items[0]
-        access_token = connection_settings.get('settings', {}).get('access_token')
-        
-        if not access_token:
-            oauth_creds = connection_settings.get('settings', {}).get('oauth', {}).get('credentials', {})
-            access_token = oauth_creds.get('access_token')
-        
-        if not access_token:
-            return None, "無法獲取Google Sheets訪問令牌"
-        
-        credentials = Credentials(token=access_token)
-        client = gspread.authorize(credentials)
-        
-        return client, None
+        return None, "未找到Google Sheets認證信息。請查看下方說明進行設置。"
         
     except Exception as e:
         return None, f"連接Google Sheets時出錯: {str(e)}"
@@ -365,6 +373,28 @@ if st.session_state.show_upload_dialog:
     st.divider()
     st.subheader("上傳到Google Sheets")
     
+    with st.expander("📖 首次設置？看這裡", expanded=False):
+        st.info("""
+**第一步：創建 Google 服務帳戶**
+1. 訪問 https://console.cloud.google.com/
+2. 建立新專案（例如：登分工具）
+3. 啟用 Google Sheets API
+4. 創建服務帳戶 (API → 認證 → 服務帳戶)
+5. 創建 JSON 金鑰並下載
+
+**第二步：添加到 Streamlit Cloud**
+1. 打開應用設置 → Secrets
+2. 添加密鑰：`google_sheets_credentials`
+3. 值：複製下載的 JSON 文件全部內容
+
+**第三步：分享 Google Sheet**
+1. 從 JSON 文件找到 `client_email`
+2. 打開你的 Google Sheet
+3. 分享 → 添加該郵箱為編輯者
+
+詳細步驟請查看應用所在目錄的 SETUP_GUIDE.md 文件。
+        """)
+    
     with st.form(key="upload_form"):
         st.markdown("**選擇方式（二選一）：**")
         
@@ -419,6 +449,35 @@ if st.session_state.show_upload_dialog:
                         st.rerun()
                     else:
                         st.error(message)
+                        
+                        # Show setup instructions if running on Streamlit Cloud
+                        if "未找到Google Sheets認證" in message:
+                            st.info("""
+### 🔧 Streamlit Cloud上的Google Sheets設置說明
+
+此應用在Streamlit Cloud上需要Google服務帳戶認證才能訪問Google Sheets。
+
+**步驟1: 建立Google服務帳戶**
+1. 訪問 [Google Cloud Console](https://console.cloud.google.com/)
+2. 創建新項目或選擇現有項目
+3. 啟用 "Google Sheets API"
+4. 創建服務帳戶 (IAM & Admin → Service Accounts)
+5. 為服務帳戶創建JSON密鑰並下載
+
+**步驟2: 在Streamlit Cloud中設置密鑰**
+1. 在應用設置中選擇 "Secrets"
+2. 將下載的JSON內容粘貼到 `Secrets` 欄中
+3. 秘密名稱應為：`google_sheets_credentials`
+4. 值為完整的JSON內容（從下載的JSON文件複製）
+
+**步驟3: 在Google Sheets中授予權限**
+1. 打開要編輯的Google Sheet
+2. 點擊「共享」按鈕
+3. 將服務帳戶的電子郵件地址添加為編輯者
+   (電子郵件形式：xxx@xxx.iam.gserviceaccount.com)
+
+完成後刷新此頁面即可使用！
+                            """)
         elif upload_submit and not column_title:
             st.error("❌ 請輸入列標題")
         
