@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "dark-safeguard-312611",
+  "private_key_id": "bdbcfad891ca5478c2a3a420a367a8c03e34b5cf",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQCSx1Dm/QZ9N5Xh\nzHXFdEbEgtgHtzQL6/P4VWE5wRXcENwSWwG4CfVb+KL9O77t3/3rKRATb2UvlLQg\nuRHqsCe4Dr2xfrPWT+KH9gqCp3onuQyoh7m8T7iJpqh9FIkwKtEyfU5RKmls6eNT\nqSz8SZvB2KFcHjCWoGq3TCo1HP7Umtd4L6/31eOMY0ByzmhkLbfEpINMBJjVcUBn\n0kV7nSm1uPTX3G67OM9trWAU+qHNfpNWmQpL7IsZCIcxON0SfF+pV3iuUrfly6+L\n9CMu3BOjfku+m5iYoYTUOEa6aDNlYVyPhP5lr+zcyPmaZMy5Rjy6KoHswrTiaLR8\n9fHvgL35AgMBAAECgf8I9/5+Xe/FB3XJtRwpWali5hnDOQ7EQ5GTL6lNlO4SHKmF\nkgPkqj8tuV9xijtzz9wMxqPDpjThQpXvKcTZMftfzjxwjXA8WCmpw9XNdtQ5GEb1\nAt+V8GyJuhSHj1/9xGq1oxwOOusjeEfPFJ5cQ7Vp46yuGen6BjbD27vb7cPa2u3f\nEFctU9Qfj2cPQedZDVZunr/2JSgYTLmpkFvD1E4glNeEMnSSuDs7RZ5PlA9CIICc\ncppRi1nlxKucoOT+8qRHBkd8NEWb4S2kM0i76tQIlo3MNUVahiB+4Lax3EstsfWZ\nzu7pKANibShb5h1mVho2klma8oA9VG8SriQ4FMECgYEAwo0AR+oqZ3td1V3+Fufb\nudNtW5qSiuUzKckMVKvMysQC8/ZBCgfYcGCaxH7jDlldVG6r1yZ1p3SeIfOU0QNc\nEyuBJyxlVJWIAZw1pS97FQZC6Hglb3hDBnQ46MBWYJ/YZnnOmAMHibhfpJIqWkqd\n49Gw1P8AUVe2SAYmz63xXrkCgYEAwSOMBhVPvvY4CTL1mz063TIBqcjai+a5KOmG\neck3Nz11HU3mZXZ3Nvys6IbwnsCIXOliAxdPIhY9n/Mf1/DokXC7O/qBmkVLPJUD\nof5YzoB+Odw4p4I1WXOb7MJ5ftOjxSwmMRkwvCugVdZnNSKLhu9vOzVOirKekdWl\n/VPkuUECgYAaLUKmanl+Jvk/JkBz8Ip9/FawhqHFEoXJz4VbNyp89da34KBrqxaS\nOE1atv/yBFAsdh+k+UXHXEeSpeWWIe+XnLjp/m077kq4fL4zFapn78m84b2XvAS4\nr5agqpB0u80wLJ+BkJbJDwe/avNL5tJLvwEeB5mRWE3sbvd15h+d8QKBgAVPfugj\n6d9sUbofBpXQJzAx0c3jUe8K1wiC80mh+LyyGehGXhFoInsGk5KJM1CKJrW3TRSc\nrXZYejVNsBB19U8adGt/xdSCF0GBL2pi3fo/mjjpDz273M+q2By4dDLCivw+7IXp\nFWf3Ix95F7lkS8XYC4zrOE+j/aww3bGLfvyBAoGAQENNpJ4AjwL63uKO7p2jqlyX\nRGufNZG5MXKqjgVzdK983X9NLLu/0p8Z/saiAqqoYXjHGii/RposzimXChjPLBL+\nc3OAy0lh2zTETsyd73SJ6LvOHlwwa/jsWUOCLpR+QH2Rj3r64qalhWXedIoHRDsb\nleW82lyfNH4DHmDnDUs=\n-----END PRIVATE KEY-----\n",
+  "client_email": "score-app-service@dark-safeguard-312611.iam.gserviceaccount.com",
+  "client_id": "117396727638433716009",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/score-app-service%40dark-safeguard-312611.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
