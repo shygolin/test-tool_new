@@ -52,7 +52,7 @@ def get_column_letter(col_index):
     return result
 
 def get_google_sheets_client():
-    """Get Google Sheets client using Replit connection, Streamlit secrets, or local secrets.json"""
+    """Get Google Sheets client using Replit connection, uploaded credentials, Streamlit Secrets, or local secrets.json"""
     try:
         hostname = os.environ.get('REPLIT_CONNECTORS_HOSTNAME')
         x_replit_token = None
@@ -93,6 +93,25 @@ def get_google_sheets_client():
                             return client, None
             except Exception:
                 pass
+        
+        # Try uploaded credentials from session state
+        try:
+            if 'uploaded_credentials' in st.session_state and st.session_state.uploaded_credentials:
+                creds_dict = st.session_state.uploaded_credentials
+                
+                from google.oauth2.service_account import Credentials as ServiceAccountCredentials
+                scopes = [
+                    'https://www.googleapis.com/auth/spreadsheets',
+                    'https://www.googleapis.com/auth/drive'
+                ]
+                credentials = ServiceAccountCredentials.from_service_account_info(
+                    creds_dict,
+                    scopes=scopes
+                )
+                client = gspread.authorize(credentials)
+                return client, None
+        except Exception:
+            pass
         
         # Try Streamlit Secrets (for Streamlit Cloud)
         try:
@@ -137,7 +156,7 @@ def get_google_sheets_client():
         except Exception as file_error:
             pass
         
-        return None, "未找到Google Sheets認證信息。請將API密鑰JSON文件保存為 secrets.json 在應用目錄中。"
+        return None, "未找到Google Sheets認證信息。請上傳密鑰文件或在本地創建 secrets.json。"
         
     except Exception as e:
         return None, f"連接Google Sheets時出錯: {str(e)}"
@@ -401,6 +420,30 @@ if st.session_state.show_upload_dialog:
     st.divider()
     st.subheader("上傳到Google Sheets")
     
+    # File upload section
+    st.markdown("### 📁 上傳您的Google服務帳戶密鑰")
+    uploaded_file = st.file_uploader(
+        "選擇您的 secrets.json 文件",
+        type=['json'],
+        help="上傳您從 Google Cloud Console 下載的 JSON 密鑰文件"
+    )
+    
+    if uploaded_file is not None:
+        try:
+            file_content = json.loads(uploaded_file.getvalue().decode("utf-8"))
+            if 'type' in file_content and file_content['type'] == 'service_account':
+                st.session_state.uploaded_credentials = file_content
+                st.success("✅ 密鑰文件已上傳成功！")
+            else:
+                st.error("❌ 這不是有效的服務帳戶JSON文件")
+        except json.JSONDecodeError:
+            st.error("❌ 文件格式錯誤，請上傳有效的JSON文件")
+    
+    if 'uploaded_credentials' in st.session_state and st.session_state.uploaded_credentials:
+        st.info(f"✅ 已加載密鑰：{st.session_state.uploaded_credentials.get('client_email', '未知')}")
+    
+    st.divider()
+    
     with st.expander("📖 首次設置？看這裡", expanded=False):
         st.info("""
 **第一步：創建 Google 服務帳戶**
@@ -410,10 +453,9 @@ if st.session_state.show_upload_dialog:
 4. 創建服務帳戶 (API → 認證 → 服務帳戶)
 5. 創建 JSON 金鑰並下載
 
-**第二步：添加到 Streamlit Cloud**
-1. 打開應用設置 → Secrets
-2. 添加密鑰：`google_sheets_credentials`
-3. 值：複製下載的 JSON 文件全部內容
+**第二步：上傳密鑰文件**
+- 在上方「上傳您的Google服務帳戶密鑰」區域上傳下載的 JSON 文件
+- 無需複雜的 Streamlit Cloud 設置！
 
 **第三步：分享 Google Sheet**
 1. 從 JSON 文件找到 `client_email`
